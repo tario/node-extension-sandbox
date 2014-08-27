@@ -92,11 +92,16 @@ void AsyncAfter(uv_work_t* req) {
     HandleScope scope;
     XBarAsyncData* asyncData = static_cast<XBarAsyncData*>(req->data);
 
-    TryCatch try_catch;
+    /*TryCatch try_catch;
     asyncData->callback->Call(Context::GetCurrent()->Global(), 0, 0);
     if (try_catch.HasCaught()) {
         node::FatalException(try_catch);
-    }
+    }*/
+
+    node::MakeCallback(Context::GetCurrent()->Global(),
+                     asyncData->callback,
+                     0,
+                     0);    
 
     asyncData->callback.Dispose();
 
