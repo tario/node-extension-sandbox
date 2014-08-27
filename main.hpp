@@ -25,4 +25,27 @@ protected:
     int value_;
 };
 
+/*
+
+var X = function() {
+}
+
+X.prototype.foo = function(a,b) {
+  return a+b;
+}
+
+*/
+
+class X : public node::ObjectWrap {
+  public:
+    static v8::Persistent<v8::FunctionTemplate> constructor;
+    static void Init(v8::Handle<v8::Object> target);
+
+  protected:
+    X();
+
+    static v8::Handle<v8::Value> New(const v8::Arguments& args);
+    static v8::Handle<v8::Value> Foo(const v8::Arguments& args);
+};
+
 #endif

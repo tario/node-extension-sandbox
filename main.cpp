@@ -62,15 +62,62 @@ Handle<Value> MyObject::Value(const Arguments& args) {
     return scope.Close(Integer::New(obj->value_));
 }
 
+Persistent<FunctionTemplate> X::constructor;
+
+X::X(){
+
+}
+
+Handle<Value> X::Foo(const Arguments& args) {
+    if (args.Length() < 2) {
+        return ThrowException(Exception::TypeError(
+            String::New("First and second argument must be numbers")));
+    }
+
+    int a = args[0]->ToInteger()->Value();
+    int b = args[1]->ToInteger()->Value();
+
+    return Integer::New(a+b);
+}
+
+Handle<Value> X::New(const Arguments& args) {
+    HandleScope scope;
+
+    if (!args.IsConstructCall()) {
+        return ThrowException(Exception::TypeError(
+            String::New("Use the new operator to create instances of this object."))
+        );
+    }
+
+    X* x = new X();
+    x->Wrap(args.This());
+
+    return args.This();
+}
 
 
+void X::Init(Handle<Object> target) {
+    HandleScope scope;
 
+    Local<FunctionTemplate> tpl = FunctionTemplate::New(New);
+    Local<String> name = String::NewSymbol("X");
 
+    constructor = Persistent<FunctionTemplate>::New(tpl);
+    // ObjectWrap uses the first internal field to store the wrapped pointer.
+    constructor->InstanceTemplate()->SetInternalFieldCount(1);
+    constructor->SetClassName(name);
 
+    NODE_SET_PROTOTYPE_METHOD(constructor, "foo", Foo);
+
+    // This has to be last, otherwise the properties won't show up on the
+    // object in JavaScript.
+    target->Set(name, constructor->GetFunction());
+}
 
 
 void RegisterModule(Handle<Object> target) {
     MyObject::Init(target);
+    X::Init(target);
 }
 
 NODE_MODULE(modulename, RegisterModule);
