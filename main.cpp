@@ -1,6 +1,6 @@
 #include <node.h>
 
-#include "modulename.hpp"
+#include "main.hpp"
 
 using namespace v8;
 
