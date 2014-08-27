@@ -80,6 +80,18 @@ Handle<Value> X::Foo(const Arguments& args) {
     return Integer::New(a+b);
 }
 
+Handle<Value> X::Bar(const Arguments& args) {
+    if (args.Length() < 1) {
+        return ThrowException(Exception::TypeError(
+            String::New("First argument should be a callback")));
+    }
+
+    Local<Function> callback = Local<Function>::Cast(args[0]);
+    callback->Call(Context::GetCurrent()->Global(), 0, 0);
+
+    return Undefined();
+}
+
 Handle<Value> X::New(const Arguments& args) {
     HandleScope scope;
 
@@ -108,6 +120,7 @@ void X::Init(Handle<Object> target) {
     constructor->SetClassName(name);
 
     NODE_SET_PROTOTYPE_METHOD(constructor, "foo", Foo);
+    NODE_SET_PROTOTYPE_METHOD(constructor, "bar", Bar);
 
     // This has to be last, otherwise the properties won't show up on the
     // object in JavaScript.

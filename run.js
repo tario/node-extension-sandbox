@@ -6,4 +6,10 @@ console.warn(obj);
 console.warn(obj.value());
 */
 var x = new modulename.X();
-console.log(x.foo(10,20));
+console.log(x.foo(-10,20));
+
+x.bar(function() {
+  console.log("called callback");
+});
+
+console.log("after call x.bar(...)");
