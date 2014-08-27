@@ -80,6 +80,31 @@ Handle<Value> X::Foo(const Arguments& args) {
     return Integer::New(a+b);
 }
 
+struct XBarAsyncData {
+    Persistent<Function> callback;
+};
+
+void AsyncWork(uv_work_t* req) {
+
+};
+
+void AsyncAfter(uv_work_t* req) {
+    HandleScope scope;
+    XBarAsyncData* asyncData = static_cast<XBarAsyncData*>(req->data);
+
+    TryCatch try_catch;
+    asyncData->callback->Call(Context::GetCurrent()->Global(), 0, 0);
+    if (try_catch.HasCaught()) {
+        node::FatalException(try_catch);
+    }
+
+    asyncData->callback.Dispose();
+
+    delete asyncData;
+    delete req;
+};
+
+
 Handle<Value> X::Bar(const Arguments& args) {
     if (args.Length() < 1) {
         return ThrowException(Exception::TypeError(
@@ -87,7 +112,17 @@ Handle<Value> X::Bar(const Arguments& args) {
     }
 
     Local<Function> callback = Local<Function>::Cast(args[0]);
-    callback->Call(Context::GetCurrent()->Global(), 0, 0);
+
+    XBarAsyncData* asyncData = new XBarAsyncData;
+    asyncData->callback = Persistent<Function>::New(callback);
+
+    // This creates the work request struct.
+    uv_work_t *req = new uv_work_t();
+    req->data = asyncData;
+
+    int status = uv_queue_work(uv_default_loop(), req, AsyncWork,
+                               (uv_after_work_cb)AsyncAfter);
+
 
     return Undefined();
 }
