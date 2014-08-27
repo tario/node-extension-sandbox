@@ -1,6 +1,7 @@
 #include <node.h>
 
 #include "main.hpp"
+#include <iostream>
 
 using namespace v8;
 
@@ -92,17 +93,23 @@ void AsyncAfter(uv_work_t* req) {
     HandleScope scope;
     XBarAsyncData* asyncData = static_cast<XBarAsyncData*>(req->data);
 
-    /*TryCatch try_catch;
+    TryCatch try_catch;
     asyncData->callback->Call(Context::GetCurrent()->Global(), 0, 0);
     if (try_catch.HasCaught()) {
+
+        std::cout << "free callback after calling it" << std::endl;
+        asyncData->callback.Dispose();
+
+        delete asyncData;
+        delete req;
+
+        std::cerr << "Node FatalException" << std::endl;
         node::FatalException(try_catch);
-    }*/
 
-    node::MakeCallback(Context::GetCurrent()->Global(),
-                     asyncData->callback,
-                     0,
-                     0);    
+        return;
+    }
 
+    std::cout << "free callback after calling it" << std::endl;
     asyncData->callback.Dispose();
 
     delete asyncData;

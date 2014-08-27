@@ -10,6 +10,7 @@ console.log(x.foo(-10,20));
 
 x.bar(function() {
   console.log("called callback");
+  throw "exception";
 });
 
 console.log("after call x.bar(...)");
